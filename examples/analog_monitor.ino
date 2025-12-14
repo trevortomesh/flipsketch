@@ -1,11 +1,18 @@
+/*
+ * FlipSketch Analog Monitor Example
+ * Copyright (c) 2025 Trevor Tomesh
+ */
+
+// Analog monitor that can flip between the three exposed analog headers.
 const int analogPinCount = 3;
-int analogPinIndex = 0;
-int analogPin = 2;        // default header label 2 → PA7
-int analogPortLabel = 7;  // PA7
+int analogPinIndex = 0;            // Tracks which header is active.
+int analogPin = 2;                 // Default header label 2 → PA7.
+int analogPortLabel = 7;           // Companion label for display purposes.
 int lastReading = -1;
 int refreshCounter = 0;
 
 void showHeader() {
+    // Display the title and which header is currently selected.
     screenPrintLine(0, "Analog monitor");
     screenPrintLine(
         1,
@@ -14,6 +21,7 @@ void showHeader() {
 }
 
 void applyPinSelection() {
+    // Cycle through header mappings based on the selected index.
     if (analogPinIndex <= 0) {
         analogPin = 2;
         analogPortLabel = 7;
@@ -25,14 +33,15 @@ void applyPinSelection() {
         analogPortLabel = 4;
     }
 
-    pinMode(analogPin, ANALOG);
+    pinMode(analogPin, ANALOG);  // Switch the pin into analog sampling mode.
     lastReading = -1;
-    refreshCounter = 0;
+    refreshCounter = 0;          // Force the display to update on the next read.
     showHeader();
     screenPrintLine(2, "Value: -- mV");
 }
 
 void selectPreviousPin() {
+    // Wrap backwards through the available analog pins.
     analogPinIndex = analogPinIndex - 1;
     if (analogPinIndex < 0) {
         analogPinIndex = analogPinCount - 1;
@@ -41,6 +50,7 @@ void selectPreviousPin() {
 }
 
 void selectNextPin() {
+    // Wrap forwards through the available analog pins.
     analogPinIndex = analogPinIndex + 1;
     if (analogPinIndex >= analogPinCount) {
         analogPinIndex = 0;
@@ -49,19 +59,23 @@ void selectNextPin() {
 }
 
 void onLeftButton() {
+    // Arrow left moves to the previous header.
     selectPreviousPin();
 }
 
 void onRightButton() {
+    // Arrow right moves to the next header.
     selectNextPin();
 }
 
 void setup() {
+    // Show button labels so Flipper routes hardware presses to the handlers.
     screenSetButtonLabels("< Prev", "", "Next >");
     applyPinSelection();
 }
 
 void loop() {
+    // Sample the current analog pin and refresh the display if it moves enough.
     int millivolts = analogRead(analogPin);
     refreshCounter = refreshCounter + 1;
 

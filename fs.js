@@ -1,12 +1,25 @@
 #!/usr/bin/env node
 
+/**
+ * FlipSketch transpiler / runtime generator.
+ * Converts a limited Arduino sketch into Flipper Zero JS.
+ *
+ * Copyright (c) 2025 Trevor Tomesh
+ */
+
 const fs = require("fs");
 const path = require("path");
 
+/**
+ * Print CLI usage when arguments are missing.
+ */
 function printUsage() {
     console.log("Usage: node fs.js <input.ino> <output.js>");
 }
 
+/**
+ * Ensure Node received input/output arguments.
+ */
 function ensureArgs(argv) {
     if (argv.length < 4) {
         printUsage();
@@ -14,14 +27,23 @@ function ensureArgs(argv) {
     }
 }
 
+/**
+ * Read the entire sketch from disk.
+ */
 function loadSource(filePath) {
     return fs.readFileSync(filePath, "utf8");
 }
 
+/**
+ * Persist generated JS to disk.
+ */
 function saveOutput(filePath, contents) {
     fs.writeFileSync(filePath, contents);
 }
 
+/**
+ * Perform naive string replacements to shift Arduino syntax toward JS.
+ */
 function normalizeTypes(source) {
     let code = source;
     code = code.replace(/#include[^\n]*\n/g, "");
@@ -47,6 +69,9 @@ function normalizeTypes(source) {
     return code;
 }
 
+/**
+ * Translate Arduino header numbers into Flipper pin strings.
+ */
 function mapArduinoPin(numberLiteral) {
     const mapping = {
         "2": "pa7",
@@ -65,6 +90,9 @@ function mapArduinoPin(numberLiteral) {
     };
     return mapping[numberLiteral] || numberLiteral;
 }
+/**
+ * Emit the runtime scaffold that wraps every transpiled sketch.
+ */
 function buildRuntimeTemplate() {
     return `let eventLoop = require("event_loop");
 let gui = require("gui");
@@ -281,12 +309,18 @@ function runArduinoSketch() {
 `;
 }
 
+/**
+ * Combine runtime and sanitized sketch.
+ */
 function transpile(source) {
     let sanitized = normalizeTypes(source);
     let runtime = buildRuntimeTemplate();
     return runtime + "\n" + sanitized.trim() + "\n\nrunArduinoSketch();\n";
 }
 
+/**
+ * CLI entry point.
+ */
 function main() {
     ensureArgs(process.argv);
     let inputPath = path.resolve(process.argv[2]);

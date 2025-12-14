@@ -1,4 +1,4 @@
-# FlipSketch
+# FlipSketch ![Vibe coded badge](https://img.shields.io/badge/mood-vibe%20coded-ff6ad5)
 
 <p align="center">
   <img src="assets/fs.png" alt="FlipSketch logo" width="520">
@@ -71,6 +71,15 @@ void onBackButton();
 ```
 
 Use `screenSetButtonLabels(left, center, right)` inside `setup()` to describe the left/center/right actions so the UI renders matching soft buttons. You can safely omit any handlers or labels you don’t need.
+
+### Roadmap / TODO
+
+This project was vibe-coded in a sprint, so a few pieces are still missing:
+
+- [ ] Broader Arduino syntax support (structs, macros, enums, etc.).
+- [ ] Publish the transpiler as an npm package/CLI so it can be installed globally.
+- [ ] Automated tests for `fs.js` and regression coverage for button handling.
+- [ ] Example sketches covering timers, PWM, and more complex GPIO workflows.
 
 ## Adapting pins
 

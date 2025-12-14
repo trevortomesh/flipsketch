@@ -211,14 +211,21 @@ function runArduinoSketch() {
     gui.viewDispatcher.sendTo("back");
 }
 
+/*
+ * FlipSketch Analog Monitor Example
+ * Copyright (c) 2025 Trevor Tomesh
+ */
+
+// Analog monitor that can flip between the three exposed analog headers.
 const analogPinCount = 3;
-let analogPinIndex = 0;
-let analogPin = 2;        // default header label 2 → PA7
-let analogPortLabel = 7;  // PA7
+let analogPinIndex = 0;            // Tracks which header is active.
+let analogPin = 2;                 // Default header label 2 → PA7.
+let analogPortLabel = 7;           // Companion label for display purposes.
 let lastReading = -1;
 let refreshCounter = 0;
 
 function showHeader() {
+    // Display the title and which header is currently selected.
     screenPrintLine(0, "Analog monitor");
     screenPrintLine(
         1,
@@ -227,6 +234,7 @@ function showHeader() {
 }
 
 function applyPinSelection() {
+    // Cycle through header mappings based on the selected index.
     if (analogPinIndex <= 0) {
         analogPin = 2;
         analogPortLabel = 7;
@@ -238,14 +246,15 @@ function applyPinSelection() {
         analogPortLabel = 4;
     }
 
-    pinMode(analogPin, ANALOG);
+    pinMode(analogPin, ANALOG);  // Switch the pin into analog sampling mode.
     lastReading = -1;
-    refreshCounter = 0;
+    refreshCounter = 0;          // Force the display to update on the next read.
     showHeader();
     screenPrintLine(2, "Value: -- mV");
 }
 
 function selectPreviousPin() {
+    // Wrap backwards through the available analog pins.
     analogPinIndex = analogPinIndex - 1;
     if (analogPinIndex < 0) {
         analogPinIndex = analogPinCount - 1;
@@ -254,6 +263,7 @@ function selectPreviousPin() {
 }
 
 function selectNextPin() {
+    // Wrap forwards through the available analog pins.
     analogPinIndex = analogPinIndex + 1;
     if (analogPinIndex >= analogPinCount) {
         analogPinIndex = 0;
@@ -262,19 +272,23 @@ function selectNextPin() {
 }
 
 function onLeftButton() {
+    // Arrow left moves to the previous header.
     selectPreviousPin();
 }
 
 function onRightButton() {
+    // Arrow right moves to the next header.
     selectNextPin();
 }
 
 function setup() {
+    // Show button labels so Flipper routes hardware presses to the handlers.
     screenSetButtonLabels("< Prev", "", "Next >");
     applyPinSelection();
 }
 
 function loop() {
+    // Sample the current analog pin and refresh the display if it moves enough.
     let millivolts = analogRead(analogPin);
     refreshCounter = refreshCounter + 1;
 

@@ -167,3 +167,20 @@ All callbacks run inside the Flipper JS event loop. The runtime automatically sw
 3. **One sketch = one script** – each `.ino` should declare its own `setup/loop`.
 4. **Use `String(...)` or `snprintf`** when mixing numbers into messages to avoid implicit conversions.
 5. **Clamp sampling rate** – for analog/digital monitors, only update when values change to prevent GUI overload.
+
+## 🤖 Note
+
+This tool was created using vibe coding — describing what I wanted to an AI assistant, refining the results through iteration. No detailed plan — just intuition, adaptation, and execution.
+
+## 🕊️ Dedication
+
+This project is dedicated to the Lord.
+
+All logic, structure, and order — including the very foundations of programming — reflect the perfection of His design. May this tool, in its small way, point toward the beauty and coherence He has written into the fabric of creation.
+
+> "I praise you, for I am fearfully and wonderfully made.
+> Wonderful are your works; my soul knows it very well."
+>
+> — Psalm 139:14
+
+Soli Deo Gloria.

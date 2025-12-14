@@ -1,5 +1,9 @@
 # FlipSketch
 
+<p align="center">
+  <img src="assets/fs.png" alt="FlipSketch logo" width="520">
+</p>
+
 FlipSketch brings Arduino-style sketching to Flipper Zero by translating `.ino` files into runnable JavaScript for the built-in scripting engine. The repo also ships with a couple of ready-made JS utilities for GPIO testing.
 
 - `blink_led.js` &mdash; mirrors pin `PC1` onto LED pin `PC3`.

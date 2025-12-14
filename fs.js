@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 
 function printUsage() {
-    console.log("Usage: node arduino_transpiler.js <input.ino> <output.js>");
+    console.log("Usage: node fs.js <input.ino> <output.js>");
 }
 
 function ensureArgs(argv) {
@@ -70,7 +70,6 @@ function buildRuntimeTemplate() {
 let gui = require("gui");
 let widgetView = require("gui/widget");
 let gpio = require("gpio");
-
 const HIGH = true;
 const LOW = false;
 const OUTPUT = "output";
@@ -109,6 +108,8 @@ const __pinMap = {
 let __screenView = widgetView.make();
 gui.viewDispatcher.switchTo(__screenView);
 let __screenLines = ["", "", ""];
+let __sketchRuntime = { running: true };
+let __buttonLabels = { left: "", center: "", right: "" };
 
 function __renderScreen() {
     let children = [];
@@ -123,6 +124,15 @@ function __renderScreen() {
                 text: __screenLines[i]
             });
         }
+    }
+    if (__buttonLabels.left && __buttonLabels.left.length > 0) {
+        children.push({ element: "button", button: "left", text: __buttonLabels.left });
+    }
+    if (__buttonLabels.center && __buttonLabels.center.length > 0) {
+        children.push({ element: "button", button: "center", text: __buttonLabels.center });
+    }
+    if (__buttonLabels.right && __buttonLabels.right.length > 0) {
+        children.push({ element: "button", button: "right", text: __buttonLabels.right });
     }
     __screenView.setChildren(children);
     gui.viewDispatcher.sendTo("front");
@@ -141,6 +151,21 @@ function screenPrintLine(index, text) {
 
 function screenPrint(text) {
     screenPrintLine(0, text);
+}
+
+function screenSetButtonLabels(left, center, right) {
+    __buttonLabels.left = left || "";
+    __buttonLabels.center = center || "";
+    __buttonLabels.right = right || "";
+    __renderScreen();
+}
+
+function stopSketch() {
+    if (!__sketchRuntime.running) {
+        return;
+    }
+    __sketchRuntime.running = false;
+    eventLoop.stop();
 }
 
 function __normalizePin(name) {
@@ -190,17 +215,68 @@ function analogRead(name) {
     return pin.readAnalog();
 }
 
+function __dispatchButtonEvent(event) {
+    if (!event || event.type !== "short") return;
+    let key = event.key;
+    if (key === "left" && typeof onLeftButton === "function") {
+        onLeftButton(event.type, event);
+    } else if (key === "right" && typeof onRightButton === "function") {
+        onRightButton(event.type, event);
+    } else if (key === "up" && typeof onUpButton === "function") {
+        onUpButton(event.type, event);
+    } else if (key === "down" && typeof onDownButton === "function") {
+        onDownButton(event.type, event);
+    } else if ((key === "center" || key === "ok") && typeof onCenterButton === "function") {
+        onCenterButton(event.type, event);
+    } else if (key === "back" && typeof onBackButton === "function") {
+        onBackButton(event.type, event);
+    }
+}
+
 function runArduinoSketch() {
     if (typeof setup === "function") {
         setup();
     }
-    while (true) {
+
+    __sketchRuntime.running = true;
+
+    let loopTimer = eventLoop.timer("periodic", 1);
+    let loopSubscription = eventLoop.subscribe(loopTimer, function (_sub, _item, runtime) {
+        if (!runtime.running) {
+            return [runtime];
+        }
         if (typeof loop === "function") {
             loop();
         } else {
-            break;
+            stopSketch();
         }
+        return [runtime];
+    }, __sketchRuntime);
+
+    let buttonSubscription = null;
+    if (__screenView.button) {
+        buttonSubscription = eventLoop.subscribe(__screenView.button, function (_sub, event, runtime) {
+            if (!runtime.running) {
+                return [runtime];
+            }
+            __dispatchButtonEvent(event);
+            return [runtime];
+        }, __sketchRuntime);
     }
+
+    let navigationSubscription = eventLoop.subscribe(gui.viewDispatcher.navigation, function (_sub, _item, runtime) {
+        stopSketch();
+        return [runtime];
+    }, __sketchRuntime);
+
+    eventLoop.run();
+
+    loopSubscription.cancel();
+    if (buttonSubscription) {
+        buttonSubscription.cancel();
+    }
+    navigationSubscription.cancel();
+    gui.viewDispatcher.sendTo("back");
 }
 `;
 }

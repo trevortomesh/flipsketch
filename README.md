@@ -8,8 +8,8 @@ FlipSketch brings Arduino-style sketching to Flipper Zero by translating `.ino
 
 - `blink_led.js` &mdash; mirrors pin `PC1` onto LED pin `PC3`.
 - `gpio_oscilloscope.js` &mdash; multi-channel GPIO scope drawn via the GUI widget view.
-- `arduino_transpiler.js` &mdash; Node-based tool that converts a limited Arduino sketch into a runnable Flipper JS file.
-- `examples/analog_monitor.ino` &mdash; reads the PA7 analog header and streams the value to the Flipper display via the transpiled screen helpers.
+- `fs.js` &mdash; Node-based tool that converts a limited Arduino sketch into a runnable Flipper JS file.
+- `examples/analog_monitor.ino` &mdash; reads the analog headers (2/3/4 → PA7/PA6/PA4) and lets you flip through them with the arrow keys while streaming values to the display.
 
 ## Example sketch
 
@@ -49,13 +49,28 @@ Complex C++ features (structs, templates, `#define`) are currently unsupported.
 2. Run the transpiler:
 
    ```sh
-   node arduino_transpiler.js examples/blink.ino out/blink.js
+   node fs.js examples/blink.ino out/blink.js
    ```
 
 3. Copy the generated `out/blink.js` to your Flipper (e.g., `/ext/apps/Scripts/blink.js`).
 4. Launch it from **Apps → Scripts** on the device.
 
 The transpiled script automatically imports `gpio`, defines Arduino-style constants (`HIGH`, `LOW`, `OUTPUT`, etc.), runs `setup()` once, then loops forever invoking `loop()`. Remember to include `delay(...)` calls in your `loop()` body so the device remains responsive.
+
+### Button helpers
+
+The runtime watches the Flipper’s hardware buttons and will call optional handlers if your sketch exports them:
+
+```cpp
+void onLeftButton();
+void onRightButton();
+void onUpButton();
+void onDownButton();
+void onCenterButton();
+void onBackButton();
+```
+
+Use `screenSetButtonLabels(left, center, right)` inside `setup()` to describe the left/center/right actions so the UI renders matching soft buttons. You can safely omit any handlers or labels you don’t need.
 
 ## Adapting pins
 
@@ -111,6 +126,7 @@ The generated JS defines a few core globals:
 | `print(...)` | Send text to the Flipper CLI (serial/UART). |
 | `screenPrint(text)` | Display a single line at the top of the screen. |
 | `screenPrintLine(index, text)` | Display up to three independent lines (0–2). |
+| `screenSetButtonLabels(left, center, right)` | Show soft-button labels so hardware button presses reach your handlers. |
 | `screenClear()` | Clear all on-screen lines. |
 | `String(value)` | Minimal Arduino-style string helper; converts numbers, booleans, objects to text. |
 

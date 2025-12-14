@@ -1,4 +1,4 @@
-# FlipSketch ![Vibe coded badge](https://img.shields.io/badge/mood-vibe%20coded-ff6ad5)
+# FlipSketch ![Vibe coded badge](https://img.shields.io/badge/mood-vibe%20coded-ff6ad5) <a href="https://github.com/trevortomesh/fearfully-coded"><img alt="Fearfully Coded 🕊️" src="https://img.shields.io/badge/Fearfully%20Coded%20🕊️-lightgrey?style=flat-square"/></a>
 
 <p align="center">
   <img src="assets/fs.png" alt="FlipSketch logo" width="520">
